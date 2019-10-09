@@ -1,13 +1,12 @@
 package com.bri.simulator.checkstatus;
 
-import com.bri.simulator.baseresponse.BaseResponse;
-import com.bri.simulator.baseresponse.CheckStatusBaseResponse;
+import com.bri.simulator.baseresponse.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class CheckStatusService {
@@ -15,39 +14,43 @@ public class CheckStatusService {
     @Autowired
     Environment env;
 
-    public ResponseEntity<CheckStatusBaseResponse> doCheckStatus(@RequestBody CheckStatusRequest checkStatusRequest) {
+    public ResponseEntity<Response> doCheckStatus(String noReferral) {
         CheckStatusResponse checkStatusResponse = new CheckStatusResponse();
-        ResponseEntity<CheckStatusBaseResponse> res;
+        ResponseEntity<Response> res;
 
-        String noReferral = checkStatusRequest.getNoReferral();
         String errCode = noReferral.substring(noReferral.length() - 4);
         String errMsg = env.getProperty("err.code." + errCode);
-        String successMsg = env.getProperty("err.code.0300");
 
         if (errMsg != null) {
-            checkStatusResponse.setResponseCode(errCode);
-            checkStatusResponse.setResponseDescription("Check status failed");
-            checkStatusResponse.setErrorDescription(errMsg);
-            res = setResponse(HttpStatus.BAD_REQUEST, checkStatusResponse);
+            res = setResponse(HttpStatus.BAD_REQUEST, checkStatusResponse, noReferral);
         } else {
-            checkStatusResponse.setResponseCode("0300");
-            checkStatusResponse.setResponseDescription(successMsg);
-            checkStatusResponse.setErrorDescription("");
-            checkStatusResponse.setNoReferral(checkStatusRequest.getNoReferral());
+            checkStatusResponse.setNoReferral(noReferral);
             checkStatusResponse.setJournalSeq("3289331");
             checkStatusResponse.setInternalTransferStatus("Payment Success");
             checkStatusResponse.setInternalTransferErrorMessage("");
-            res = setResponse(HttpStatus.OK, checkStatusResponse);
+            res = setResponse(HttpStatus.OK, checkStatusResponse, noReferral);
         }
         return res;
 
     }
 
-    private static ResponseEntity<CheckStatusBaseResponse> setResponse(HttpStatus httpStatus, CheckStatusResponse checkStatusResponse) {
-        BaseResponse<CheckStatusResponse> response = new BaseResponse<>();
-        CheckStatusBaseResponse cbs = new CheckStatusBaseResponse();
-        response.setData(checkStatusResponse);
-        cbs.setDoCheckStatusResponse(response);
-        return ResponseEntity.status(httpStatus).body(cbs);
+    private ResponseEntity<Response> setResponse(HttpStatus httpStatus, CheckStatusResponse checkStatusResponse, String NoReferral) {
+        Response response = new Response();
+        String errCode = NoReferral.substring(NoReferral.length()-4);
+        String errMsg = env.getProperty("err.code." + errCode);
+        String successMsg = env.getProperty("err.code.0300");
+
+        if (errMsg != null) {
+            response.setResponseCode(errCode);
+            response.setResponseDescription("Check status failed");
+            response.setErrorDescription(errMsg);
+            response.setData(checkStatusResponse);
+        } else {
+            response.setResponseCode("0300");
+            response.setResponseDescription(successMsg);
+            response.setErrorDescription("");
+            response.setData(checkStatusResponse);
+        }
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(response);
     }
 }

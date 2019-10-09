@@ -1,6 +1,8 @@
 package com.bri.simulator.payment;
 
 import com.bri.simulator.baseresponse.PaymentBaseResponse;
+import com.bri.simulator.baseresponse.Response;
+import com.bri.simulator.baseresponse.ResponsePayment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,7 @@ public class PaymentController {
     PaymentService paymentService;
 
     @PostMapping(produces = "application/json")
-    public ResponseEntity<PaymentBaseResponse> doPayment(@RequestBody @Valid PaymentRequest paymentRequest) {
+    public ResponseEntity<ResponsePayment> doPayment(@RequestBody @Valid PaymentRequest paymentRequest) {
         return paymentService.doPayment(paymentRequest);
     }
 }

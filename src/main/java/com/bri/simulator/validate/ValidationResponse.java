@@ -5,10 +5,6 @@ import lombok.Data;
 @Data
 public class ValidationResponse {
 
-    private String responseCode;
-    private String responseDescription;
-    private String errorDescription;
-
     private String sourceAccount;
     private String sourceAccountName;
     private String sourceAccountStatus;

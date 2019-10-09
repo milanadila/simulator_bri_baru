@@ -1,12 +1,11 @@
 package com.bri.simulator.baseresponse;
 
-
 import lombok.Data;
 
 @Data
-public class BaseResponse<T> {
+public class ResponsePayment {
     private String responseCode;
     private String responseDescription;
     private String errorDescription;
-    private T Data;
+    private String JournalSeq;
 }
